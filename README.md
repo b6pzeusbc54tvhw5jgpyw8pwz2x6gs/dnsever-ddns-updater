@@ -8,6 +8,7 @@ npm install dnsever-ddns-updater
 
 ## run with pm2
 - It is recommended to use [pm2](http://pm2.keymetrics.io/).
+- This method is very easy, simple and it make your life better.
 - Insert your DNSEver account information to "env" in pm2script.json file.
 - Example
 ```
