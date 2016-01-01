@@ -1,12 +1,12 @@
 # ddns-update-for-dnsever
 For [DNSEver.com](DNSEver.com) ( DNS Service in Korea ), Node Dynamic DNS Updater
 
-# install
+## install
 ```
 npm install dnsever-ddns-updater
 ```
 
-# run with pm2
+## run with pm2
 - It is recommended to use [pm2](http://pm2.keymetrics.io/).
 - Insert your DNSEver account information to "env" in pm2script.json file.
 - Example
@@ -34,7 +34,7 @@ npm install dnsever-ddns-updater
 - You can see log: `pm2 logs "DNSEver.com DDNS Updater" --raw`
 - First, the Updater will be wait for 10sec, then try update ddns every 90sec.
 
-# run without pm2, you must type manually following command in cli.
+## run without pm2, you must type manually following command in cli.
 ```
 DNSEVER_ID=myDNSEverUserID \
 DNSEVER_DDNS_SECRET_CODE=DDNSSecretCode \
@@ -43,7 +43,7 @@ DNSEVER_AUTO_RUN
 node ddnsUpdate.js
 ```
 
-# run as API
+## run as API
 ### Notice! Need to test!
 ```
 var updater = require('dnsever-ddns-updater');
