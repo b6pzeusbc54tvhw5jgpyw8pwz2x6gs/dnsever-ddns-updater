@@ -33,7 +33,7 @@ npm install dnsever-ddns-updater
 ```
 - After edit, just type `pm2 start pm2script.json`
 - You can see log: `pm2 logs "DNSEver.com DDNS Updater" --raw`
-- First, the Updater will be wait for 10sec, then try update ddns every 90sec.
+- First, the Updater will be wait for 10sec, then try update DDNS every 90sec.
 
 ## run without pm2,
 you must type manually following command in cli.
