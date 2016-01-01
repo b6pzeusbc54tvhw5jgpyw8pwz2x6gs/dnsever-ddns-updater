@@ -34,7 +34,8 @@ npm install dnsever-ddns-updater
 - You can see log: `pm2 logs "DNSEver.com DDNS Updater" --raw`
 - First, the Updater will be wait for 10sec, then try update ddns every 90sec.
 
-## run without pm2, you must type manually following command in cli.
+## run without pm2,
+you must type manually following command in cli.
 ```
 DNSEVER_ID=myDNSEverUserID \
 DNSEVER_DDNS_SECRET_CODE=DDNSSecretCode \
