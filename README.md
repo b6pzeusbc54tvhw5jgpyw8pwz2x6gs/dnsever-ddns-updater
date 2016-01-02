@@ -42,7 +42,7 @@ you must type manually following command in cli.
 ```
 DNSEVER_ID=myDNSEverUserID \
 DNSEVER_DDNS_SECRET_CODE=DDNSSecretCode \
-DNSEVER_TARGET_HOST_NAME_TO_IP={"www.your-domain.cokjm": "123.123.123.123","your-domain.com": "123.123.123.123"} \
+DNSEVER_TARGET_HOST_NAME_TO_IP={"www.your-domain.com": "123.123.123.123","your-domain.com": "123.123.123.123"} \
 DNSEVER_AUTO_RUN
 node ddnsUpdate.js
 ```
@@ -51,5 +51,5 @@ node ddnsUpdate.js
 ### Notice! Need to test!
 ```
 var updater = require('dnsever-ddns-updater');
-updater.start( 'userId', 'secretCode', {"www.your-domain.cokjm": "123.123.123.123","your-domain.com": "123.123.123.123"});
+updater.start( 'userId', 'secretCode', {"www.your-domain.com": "123.123.123.123","your-domain.com": "123.123.123.123"});
 ```
