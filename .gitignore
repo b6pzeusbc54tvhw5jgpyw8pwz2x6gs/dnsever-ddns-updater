@@ -1,3 +1,6 @@
+# my config
+pm2script.my.json
+
 # Logs
 logs
 *.log

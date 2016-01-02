@@ -1,0 +1,22 @@
+{
+  "name": "dnsever-ddns-updater",
+  "version": "1.0.0",
+  "main": "ddnsUpdate.js",
+  "scripts": {
+    "start": "pm2 ddnsUpdate.js"
+  },
+  "license": "MIT",
+  "author": "Alfred UC",
+  "repository": {
+	  "type": "git",
+	  "url": "https://github.com/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater"
+  },
+  "dependencies": {
+    "invariant": "^2.2.0",
+    "request-promise": "^1.0.2",
+    "tracer": "^0.7.3",
+    "underscore": "^1.8.3",
+    "xmldom": "^0.1.19",
+    "xpath": "0.0.7"
+  }
+}
