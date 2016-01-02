@@ -4,6 +4,8 @@ For [DNSEver.com](DNSEver.com) ( DNS Service in Korea ), Node Dynamic DNS Update
 ## install
 ```
 git clone https://github.com/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater
+cd dnsever-ddns-updater
+npm install
 ```
 
 ## run with pm2
