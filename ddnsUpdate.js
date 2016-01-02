@@ -13,13 +13,11 @@ function _transformXML( body ) {
 	return new dom().parseFromString( body );
 }
 
+var realIpAddr = '';
+var today = -1;
 function _update( id, code, targetHostNameToIp ) {
 
-	var realIpAddr = '';
-	var today = -1;
-
 	var auth = new Buffer( id+':'+code ).toString('base64');
-
 	var	header = {
 		'Authorization': 'Basic ' + auth,
 		'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36',
