@@ -25,6 +25,7 @@ function _update( id, code, targetHostNameToIp ) {
 
 	var newDay = (new Date()).getDay();
 	if( today !== newDay ) {
+		// 적어도 하루에 한번씩은 log를 남긴다
 		logger.info( 'Today: ', (new Date()).toLocaleDateString() );
 		today = newDay;
 	}
@@ -48,19 +49,23 @@ function _update( id, code, targetHostNameToIp ) {
 
 	}).then( function( doc ) {
 
-		//logger.debug( 'gethost res:\n' + doc.toString() );
+		logger.debug( 'gethost res:\n' + doc.toString() );
 
 		var resHostNameList = xpath.select( "//host/@name", doc );
+		var resHostIpList = xpath.select( "//host/@ip", doc );
 
 		var qs = {};
-		resHostNameList.forEach( function( name ) {
+		resHostNameList.forEach( function( name, i ) {
 
 			var targetIp = targetHostNameToIp[ name.value ];
-			if( targetIp === undefined ) return;
+			if( targetIp === "IGNORE" ) return;
 
 			if( ! targetIp ) targetIp = realIpAddr;
 
-			qs[ 'host['+name.value+']' ] = targetIp;
+			if( resHostIpList[i].value !== targetIp ) {
+				// 현재 셋팅된 ip와 다를 경우 ddns update 요청을 날릴것이다
+				qs[ 'host['+name.value+']' ] = targetIp;
+			}
 		});
 
 		if( _.isEmpty( qs )) {
