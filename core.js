@@ -84,7 +84,7 @@ function _update() {
 function start() {
 
 	var id = env.id;
-	var secret_code = env.secret_code;
+	var auth_code = env.auth_code;
 
 	setTimeout( function() {
 
@@ -92,9 +92,9 @@ function start() {
 			logger.error("dnsEver.com 'id' must be set, please command below");
 			logger.error('$ dnsever-ddns-updater id your_id');
 			return;
-		} else if( ! secret_code ) {
-			logger.error("dnsEver.com 'secret_code' must be set, please command below");
-			logger.error('$ dnsever-ddns-updater secret_code your_secret_code');
+		} else if( ! auth_code ) {
+			logger.error("dnsEver.com 'auth_code' must be set, please command below");
+			logger.error('$ dnsever-ddns-updater auth_code your_auth_code');
 		}
 
 		_update();
@@ -115,7 +115,7 @@ function deleteHost() {
 
 function getHeader() {
 
-	var auth = new Buffer( env.id+':'+env.secret_code ).toString('base64');
+	var auth = new Buffer( env.id+':'+env.auth_code ).toString('base64');
 	var	header = {
 		'Authorization': 'Basic ' + auth,
 		'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36',
@@ -140,7 +140,6 @@ function getCurrentDDNSSetting() {
 		code = code[0].value;
 
 		if( code !== "700" ) {
-			logger.error({ errorCode: code, errorMsg: msg });
 			deferred.resolve({ errorCode: code, errorMsg: msg });
 			return;
 		}
@@ -179,7 +178,7 @@ if ( fs.existsSync( CONFIG_FILE_PATH )) {
 
 } else {
 
-	env = { id: '',  secret_code: '', exceptionMap: {} };
+	env = { id: '',  auth_code: '', exceptionMap: {} };
 }
 
 function save() {
@@ -197,6 +196,11 @@ function getEnv( key ) {
 	return env[ key ];
 }
 
+function removeException( host ) {
+
+	delete env.exceptionMap[ host ];
+	save();
+}
 function addException( host, ip ) {
 	
 	env.exceptionMap[ host ] = ip;
@@ -220,7 +224,7 @@ function getPublicIp() {
 }
 
 function clean() {
-	env = { id: '',  secret_code: '', exceptionMap: {} };
+	env = { id: '',  auth_code: '', exceptionMap: {} };
 	save();
 }
 
@@ -230,6 +234,7 @@ module.exports = {
 	setEnv: setEnv,
 	getEnv: getEnv,
 	addException: addException,
+	removeException: removeException,
 	getPublicIp: getPublicIp,
 	getCurrentDDNSSetting: getCurrentDDNSSetting,
 	start: start
