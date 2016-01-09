@@ -1,0 +1,277 @@
+#!/usr/bin/env node
+
+const when = require( 'when' );
+const fs = require('fs');
+const _ = require('underscore');
+const core = require('../core');
+const jsonFormat = require('json-format');
+const syncExec = require('sync-exec');
+const path = require('path');
+const Table = require('cli-table2');
+const readlinkSync = require('graceful-readlink').readlinkSync;
+const spawn = require('child_process').spawn;
+const CONFIG_FILE_NAME = 'config.json';
+const pkg = require('../package.json');
+const program = require('commander');
+require( 'colors' );
+
+//
+//constants, enum
+//
+//const ERROR_EXIT = 1;
+//const SUCCESS_EXIT = 0;
+
+const ROOT_PATH = path.resolve(process.env.HOME, '.dnsever-ddns-updater');
+const LOG_PATH = path.resolve( ROOT_PATH, 'logs');
+const PROCESS_FILE_PATH = path.resolve( ROOT_PATH, 'process.json' );
+var IP_REGEXP = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+
+//
+//init
+//
+(function() {
+  if (!fs.existsSync( ROOT_PATH )) {
+    fs.mkdirSync( ROOT_PATH );
+    fs.mkdirSync( LOG_PATH );
+  }
+
+  if (process.stdout._handle && process.stdout._handle.setBlocking)
+    process.stdout._handle.setBlocking(true);
+}());
+
+
+program.version(pkg.version);
+
+program.on('--help', function() {
+  console.log('  Basic Examples:');
+  console.log('');
+  console.log('    Set a your dnsEver.com id and secret code');
+  console.log('    $ dnsever-ddns-updater id wonbin32');
+  console.log('    $ dnsever-ddns-updater secret_code oiwj32olkd');
+  console.log('');
+  console.log('    Check your above setting');
+  console.log('    $ dnsever-ddns-updater config');
+  console.log('');
+  console.log('    Start the updater process.');
+  console.log('    $ dnsever-ddns-updater start');
+  console.log('');
+  console.log('    Updater try to set all your host ddns to public ip. If you set host__ip_map, each host will set as map');
+  console.log('    $ dnsever-ddns-updater add fakebook.com 123.123.123.123');
+  console.log('');
+  console.log('    More information in https://github.com/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater');
+  console.log('');
+});
+
+program.command('show')
+.description('display all configure value')
+.action(function() {
+	config();
+});
+
+program.command('clean')
+.description('Reset all settings')
+.action(function() {
+	core.clean();
+});
+
+program.command('exception <host> <ip>')
+.description('register host:ip to the exception list')
+.action(function( host, ip ) {
+
+	if( ! host ) {
+
+		console.log('host and ip are required');
+		return;
+
+	} else if( ! ip || ! IP_REGEXP.test( ip )) {
+
+		console.log('Wrong ip address'.red);
+		return;
+
+	} else {
+
+		core.addException( host, ip );
+	}
+
+	printExceptionMap( core.getEnv('exceptionMap'));
+});
+
+program.command('delete <host>')
+.description('delete a registered host')
+.action(function( host ) {
+
+	core.deleteHost( host );
+
+	var hostList = core.getCurrentDDNSSetting();
+	_.each( hostList, function( host ) {
+		console.log( host.name, '==>', host.ip );
+	});
+});
+
+program.command('id <id>')
+.description('set your DNSEver.com user id')
+.action(function( id ) {
+	core.setEnv( 'id', id );
+	printCurrentConfig();
+});
+program.command('secret_code <secret_code>')
+.description('set your DNSEver.com secret_code')
+.action(function( secretCode ) {
+	core.setEnv( 'secret_code', secretCode );
+	printCurrentConfig();
+});
+
+program.command('set <key> <val>')
+.description('set your DNSEver.com ID or Secret code')
+.action(function( key, val ) {
+	core.setEnv( key, val );
+	console.log( key, ': ', core.getEnv( key ));
+});
+
+
+var globalPm2Path;
+var pm2script = {
+	"name": "DNSEver.com DDNS Updater",
+	"script": path.join( __dirname, '../starter.js'),
+	"cwd": ROOT_PATH,
+	"watch": [ CONFIG_FILE_NAME ],
+	"args": [ "--color" ]
+};
+
+var stdioOption = [ process.stdin, process.stdout, process.stderr ];	
+// var stdioOption = [0,1,2];
+
+program.command('start')
+.description('Start the DNSEver DDNS Updater process')
+.action(function() {
+
+	jsonFormat( pm2script );
+	fs.writeFileSync( PROCESS_FILE_PATH, jsonFormat( pm2script ));
+
+	spawn( globalPm2Path, ['start', PROCESS_FILE_PATH ], { stdio:stdioOption });
+});
+
+program.command('stop')
+.description('Stop the DNSEver DDNS Updater process')
+.action(function() {
+
+	jsonFormat( pm2script );
+	fs.writeFileSync( PROCESS_FILE_PATH, jsonFormat( pm2script ));
+
+	spawn( globalPm2Path, ['delete', pm2script.name ], { stdio: stdioOption });
+});
+
+program.command('log')
+.description('display logs of the DNSEver DDNS Updater process')
+.action(function() {
+
+	spawn( globalPm2Path, ['logs', pm2script.name, '--raw'], { stdio: stdioOption });
+});
+
+//
+// pm2 process.json
+//
+(function() {
+	var res = syncExec('which pm2');
+	var maybeSymlinkPath = ( res.stdout || '' ).replace( /\n$/,'' );
+	globalPm2Path = readlinkSync( maybeSymlinkPath );
+
+	if( ! /$\//.test( globalPm2Path ) ) {
+		globalPm2Path = path.join( path.dirname(maybeSymlinkPath), globalPm2Path );
+	}
+}());
+
+program.parse(process.argv);
+
+function config() {
+
+	return when.all([ core.getPublicIp(), core.getCurrentDDNSSetting() ])
+	.then( function( result ) {
+
+		var public_ip = result[0];
+		var currentDDNSSettings = result[1];
+
+		printCurrentConfig( public_ip );
+		printCurrentDDNSSetting( currentDDNSSettings );
+		printExceptionMap( core.getEnv('exceptionMap'));
+	});
+}
+
+function printCurrentConfig( public_ip ) {
+
+	var id = core.getEnv('id');
+	var secret_code = core.getEnv('secret_code');
+	if( ! id ) id = '[아이디를 설정하세요]'.red;
+	else id = id.green;
+
+	if( ! secret_code ) secret_code = '[다이나믹DNS 인증코드를]'.red;
+	else secret_code = secret_code.green;
+
+
+	var table = new Table({
+		chars: { mid: '', 'left-mid': '', 'right-mid': '', 'mid-mid': '' },
+		colWidths: [ 28, 34 ]
+	});
+	table.push(
+		[{ hAlign: 'right', content:'dnsEver.com id'}, id ],
+		[{ hAlign: 'right', content:'dnsEver.com secret_code'}, secret_code ]
+	);
+
+	if( public_ip ) {
+		if( IP_REGEXP.test( public_ip )) public_ip = public_ip.green;
+		else public_ip = 'NOT_FOUND_PUBLIC_UP'.red;
+		table.push(
+			[{ hAlign: 'right', content:'current public_ip'}, public_ip ]
+		);
+	}
+
+	console.log('');
+	console.log( '  Config settings' );
+	console.log( table.toString() );
+}
+
+function printCurrentDDNSSetting( map ) {
+
+	console.log('');
+	console.log('  현재 DDNS 설정상태');
+	console.log('───────────────────────────────────────────────────────'.gray);
+
+	if( _.isEmpty( map )) {
+		console.log( '{ }' );
+	} else if( map.errorCode ) {
+		console.log( jsonFormat(map, { type:'space',size:2 }).red );
+	} else {
+		console.log( jsonFormat(map, { type:'space',size:2 }) );
+	}
+
+	//var table = new Table({ chars: { right: '' }, colWidths: [ 69 ] });
+	//table.push( [ map ]);
+	//console.log( table.toString() );
+}
+
+function printExceptionMap( exceptionMap ) {
+
+	console.log('');
+	console.log('  업데이트 예외 설정 - public_ip 로 셋팅되지 않는 host');
+	console.log('───────────────────────────────────────────────────────'.gray);
+	if( _.isEmpty( exceptionMap )) {
+		console.log( '{ }' );
+	} else {
+		console.log( jsonFormat(exceptionMap, { type:'space',size:2 }) );
+	}
+
+	//var table = new Table({ chars: { right: '' }, colWidths: [ 69 ] });
+	//table.push([ jsonFormat(exceptionMap) ]);
+	//console.log(beautify(obj, null, 2, 80);
+				
+	//console.log( table.toString() );
+}
+
+if (process.argv.length == 2) {
+
+	config().then( function() {
+		console.log( '' );
+		console.log('  -h, --help     output usage information'.yellow );
+		console.log( '' );
+	});
+}

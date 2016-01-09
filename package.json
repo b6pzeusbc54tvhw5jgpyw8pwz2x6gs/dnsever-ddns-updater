@@ -1,20 +1,42 @@
 {
   "name": "dnsever-ddns-updater",
   "description": "Nodejs Dynamic DNS Updater For DNSEver.com(DNS Service in Korea) User",
-  "version": "1.2.0",
-  "main": "ddnsUpdate.js",
+  "version": "2.1.0",
+  "main": "core.js",
   "license": "MIT",
   "author": "Alfred UC",
   "repository": {
-	  "type": "git",
-	  "url": "https://github.com/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater"
+    "type": "git",
+    "url": "https://github.com/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater"
+  },
+  "directories": {
+    "bin": "./bin"
+  },
+  "bin": {
+    "dnsever-ddns-updater": "./bin/dnsever-ddns-updater"
   },
   "dependencies": {
-    "invariant": "^2.2.0",
+    "cli-table2": "^0.1.9",
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
+    "graceful-readlink": "^1.0.1",
+    "json-beautify": "^1.0.1",
+    "json-format": "^0.1.1",
+    "log4js": "^0.6.29",
+    "log4js-extend": "^0.1.2",
     "request-promise": "^1.0.2",
-    "tracer": "^0.7.3",
+    "sync-exec": "^0.6.2",
     "underscore": "^1.8.3",
+    "when": "^3.7.7",
     "xmldom": "^0.1.19",
     "xpath": "0.0.7"
-  }
+  },
+  "keywords": [
+    "dnsever",
+    "ddns",
+    "updater",
+    "pm2",
+    "ddns update",
+    "dynamic dns"
+  ]
 }
