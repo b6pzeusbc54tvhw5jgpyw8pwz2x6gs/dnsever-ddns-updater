@@ -191,7 +191,7 @@ program.command('log')
 // pm2 process.json
 //
 (function() {
-	var res = syncExec('which pm3');
+	var res = syncExec('which pm2');
 	var maybeSymlinkPath = ( res.stdout || '' ).replace( /\n$/,'' );
 	if( maybeSymlinkPath ) {
 		globalPm2Path = readlinkSync( maybeSymlinkPath );
@@ -240,7 +240,6 @@ function printCurrentConfig( public_ip ) {
 
 	if( ! auth_code ) auth_code = '[다이나믹DNS 인증코드를]'.red;
 	else auth_code = auth_code.green;
-
 
 	var table = new Table({
 		chars: { mid: '', 'left-mid': '', 'right-mid': '', 'mid-mid': '' },
