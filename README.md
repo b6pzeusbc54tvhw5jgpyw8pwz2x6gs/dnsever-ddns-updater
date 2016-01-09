@@ -1,18 +1,22 @@
 # ddns-update-for-dnsever
-For [DNSEver.com](DNSEver.com) ( DNS Service in Korea ), Node Dynamic DNS Updater
+Nodejs DDNS Updater, for [DNSEver.com](DNSEver.com) ( DNS Service in Korea ).
+(DDNS: Dynamic Domain Name Service)
 
+## pre install
+// 프로세스 매니저인 pm2 환경에서 실행됩니다.
+// pm2 가 설치되어 있지 않으면 아래의 명령어로 설치합니다.
+```
+sudo npm install -g pm2
+```
 
 ## install
 ```
 sudo npm install -g dnsever-ddns-updater
-
-// If pm2 is not installed,
-sudo npm install -g pm2
 ```
 
 ## Usage 
 ```
-  Usage: dnsever-ddns-updater [options] [command]
+  Usage: dnsever-ddns-updater [command]
 
 
   Commands:

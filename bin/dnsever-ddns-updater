@@ -40,7 +40,9 @@ var IP_REGEXP = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[0
 }());
 
 
-program.version(pkg.version);
+program
+.version(pkg.version)
+.usage('[command]');
 
 program.on('--help', function() {
   console.log('  Basic Examples:');
@@ -242,7 +244,7 @@ function printCurrentConfig( public_ip ) {
 	else auth_code = auth_code.green;
 
 	var table = new Table({
-		chars: { mid: '', 'left-mid': '', 'right-mid': '', 'mid-mid': '' },
+		chars: { right: '', left: '', mid: '', 'left-mid': '', 'right-mid': '', 'mid-mid': '' },
 		colWidths: [ 28, 34 ]
 	});
 	table.push(
