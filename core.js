@@ -1,4 +1,3 @@
-//var logger = require('tracer').colorConsole();
 var request = require( 'request-promise' );
 var when = require( 'when' );
 var fs = require( 'fs' );

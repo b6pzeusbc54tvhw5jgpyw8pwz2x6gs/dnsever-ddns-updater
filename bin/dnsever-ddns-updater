@@ -134,7 +134,7 @@ var pm2script = {
 	"name": "DNSEver.com DDNS Updater",
 	"script": path.join( __dirname, '../starter.js'),
 	"cwd": ROOT_PATH,
-	"watch": [ CONFIG_FILE_NAME ],
+	"watch": [ './'+CONFIG_FILE_NAME ],
 	"args": [ "--color" ]
 };
 
