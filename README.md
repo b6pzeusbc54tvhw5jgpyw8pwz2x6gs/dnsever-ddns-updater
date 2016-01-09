@@ -14,6 +14,10 @@ sudo npm install -g pm2
 sudo npm install -g dnsever-ddns-updater
 ```
 
+## screenshot
+![설치와 실행](https://f.cloud.github.com/assets/3797062/2039359/a8e938d6-899f-11e3-8789-60025ea83656.gif)
+
+
 ## Usage 
 ```
   Usage: dnsever-ddns-updater [command]
