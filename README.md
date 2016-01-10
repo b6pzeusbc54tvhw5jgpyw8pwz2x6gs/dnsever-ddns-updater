@@ -14,11 +14,24 @@ sudo npm install -g pm2
 sudo npm install -g dnsever-ddns-updater
 ```
 
-## screenshot
-![설치와 실행](https://f.cloud.github.com/assets/3797062/2039359/a8e938d6-899f-11e3-8789-60025ea83656.gif)
 
+## Usage
 
-## Usage 
+### install and show settings
+![](https://raw.githubusercontent.com/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater/master/screenshot/01_install_first_run.png)
+
+### Set your id and auth_code, and check your domain in DNSEver.com
+![](https://raw.githubusercontent.com/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater/master/screenshot/02_setting_id_auth_code.png)
+
+### Run process, wait 5sec, then *ths updater* will try to update your DDNS for your all domain
+![](https://raw.githubusercontent.com/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater/master/screenshot/03_start.png)
+
+### Check new updated DDNS. Without exception, your all domain will be updated as current public_ip
+![](https://raw.githubusercontent.com/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater/master/screenshot/04_result.png)
+
+### Every 90sec, *the updater* compare to public ip and DNSEver.com setting. If update needed, try to update.
+
+## $ dnsever-ddns-updater --help
 ```
   Usage: dnsever-ddns-updater [command]
 
