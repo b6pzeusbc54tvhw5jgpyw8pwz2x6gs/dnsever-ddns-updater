@@ -2,7 +2,7 @@
   "name": "dnsever-ddns-updater",
   "preferGlobal": "true",
   "description": "Nodejs Dynamic DNS Updater For DNSEver.com(DNS Service in Korea) User",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "main": "core.js",
   "license": "MIT",
   "author": "Alfred UC",
