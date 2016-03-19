@@ -1,6 +1,0 @@
-{
-	"name": "DNSEver.com DDNS Updater",
-	"script": "ddnsUpdate.js",
-	"cwd": "ddnsUpdate.js",
-	"args": [ "--color" ]
-}

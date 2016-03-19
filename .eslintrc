@@ -1,0 +1,24 @@
+{
+  "env": {
+    "node": true,
+		"es6": true
+  },
+	"parserOptions": {
+		"ecmaVersion": 6,
+		"sourceType": "module"
+	},
+  "rules": {
+    "semi": 1,
+    "no-unused-vars": [1, {"vars": "all", "args": "after-used"}],
+    "no-undef": 2,
+    "no-redeclare": 2,
+    "no-cond-assign": 1,
+    "no-unreachable": 1,
+    "block-scoped-var": 2,
+    "no-shadow": [2, {"hoist": "functions", "allow": ["e"] }],
+    "no-use-before-define": [2, "nofunc"]
+  },
+  "globals": {
+
+  }
+}

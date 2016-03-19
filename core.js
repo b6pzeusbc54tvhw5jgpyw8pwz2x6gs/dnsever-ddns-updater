@@ -1,3 +1,5 @@
+'use strict';
+
 var request = require( 'request-promise' );
 var when = require( 'when' );
 var fs = require( 'fs' );
@@ -17,13 +19,43 @@ var GET_IP_URL = 'http://dyna.dnsever.com/getip.php';
 var UPDATE_URL = "http://dyna.dnsever.com/update.php";
 var IP_REGEXP = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
+
+//
+//init
+//
+const ROOT_PATH = path.resolve(process.env.HOME, '.dnsever-ddns-updater');
+const LOG_PATH = path.resolve( ROOT_PATH, 'logs');
+//const PROCESS_FILE_PATH = path.resolve( ROOT_PATH, 'process.json' );
+const ENV_PATH = path.resolve( ROOT_PATH, 'config.json' );
+let env = (function () {
+
+	if ( fs.existsSync( ENV_PATH )) {
+
+		var contents = fs.readFileSync( ENV_PATH, 'utf8' );
+		return JSON.parse( contents );
+
+	} else {
+
+		return { id: '',  auth_code: '', exceptionMap: {} };
+	}
+}());
+(function() {
+  if (!fs.existsSync( ROOT_PATH )) {
+    fs.mkdirSync( ROOT_PATH );
+    fs.mkdirSync( LOG_PATH );
+  }
+
+  if (process.stdout._handle && process.stdout._handle.setBlocking)
+    process.stdout._handle.setBlocking(true);
+}());
+
 function _transformXML( body ) {
 	return new dom().parseFromString( body );
 }
 
 var realIpAddr = '';
 var today = -1;
-function _update() {
+function _tick() {
 
 	var newDay = (new Date()).getDay();
 	if( today !== newDay ) {
@@ -97,8 +129,8 @@ function start() {
 			logger.error('$ dnsever-ddns-updater auth_code your_auth_code');
 		}
 
-		_update();
-		setInterval( _update, 1000 * 90 );
+		_tick();
+		setInterval( _tick, 1000 * 90 );
 
 	}, 1000 * 5 );
 };
@@ -166,24 +198,9 @@ function getCurrentDDNSSetting() {
 	return deferred.promise;
 }
 
-const ROOT_PATH = path.resolve(process.env.HOME, '.dnsever-ddns-updater');
-const CONFIG_FILE_NAME = 'config.json';
-const CONFIG_FILE_PATH = path.join( ROOT_PATH, CONFIG_FILE_NAME );
-
-var env;
-if ( fs.existsSync( CONFIG_FILE_PATH )) {
-
-	var contents = fs.readFileSync( CONFIG_FILE_PATH, 'utf8' );
-	env = JSON.parse( contents );
-
-} else {
-
-	env = { id: '',  auth_code: '', exceptionMap: {} };
-}
-
 function save() {
-	var contents = JSON.stringify( env );
-	fs.writeFileSync( CONFIG_FILE_PATH, contents );
+	var envStr = JSON.stringify( env, null, 2 );
+	fs.writeFileSync( ENV_PATH, envStr );
 }
 
 function setEnv( key, val ) {
@@ -227,6 +244,13 @@ function clean() {
 	env = { id: '',  auth_code: '', exceptionMap: {} };
 	save();
 }
+function getEnvPath() {
+	return ENV_PATH;
+}
+function getRootPath() {
+	return ROOT_PATH;
+}
+
 
 module.exports = {
 	clean: clean,
@@ -237,5 +261,7 @@ module.exports = {
 	removeException: removeException,
 	getPublicIp: getPublicIp,
 	getCurrentDDNSSetting: getCurrentDDNSSetting,
-	start: start
+	start: start,
+	getEnvPath: getEnvPath,
+	getRootPath: getRootPath
 };

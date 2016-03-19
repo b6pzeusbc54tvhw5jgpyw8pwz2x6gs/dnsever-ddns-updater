@@ -2,7 +2,7 @@
   "name": "dnsever-ddns-updater",
   "preferGlobal": "true",
   "description": "Nodejs Dynamic DNS Updater For DNSEver.com(DNS Service in Korea) User",
-  "version": "2.2.6",
+  "version": "2.3.0",
   "main": "core.js",
   "license": "MIT",
   "author": "Alfred UC",
@@ -13,16 +13,16 @@
   "directories": {
     "bin": "./bin"
   },
+  "scripts": {
+    "test": "node jasmineTest.js"
+  },
   "bin": {
     "dnsever-ddns-updater": "./bin/dnsever-ddns-updater"
   },
   "dependencies": {
-    "ansi-escape-string": "^1.0.0",
     "cli-table2": "^0.1.9",
+    "colors": "^1.1.2",
     "commander": "^2.9.0",
-    "graceful-readlink": "^1.0.1",
-    "json-beautify": "^1.0.1",
-    "json-format": "^0.1.1",
     "log4js": "^0.6.29",
     "log4js-extend": "^0.1.2",
     "request-promise": "^1.0.2",
@@ -39,5 +39,10 @@
     "pm2",
     "ddns update",
     "dynamic dns"
-  ]
+  ],
+  "devDependencies": {
+    "eslint": "^2.4.0",
+    "jasmine": "^2.4.1",
+    "jasmine-spec-reporter": "^2.4.0"
+  }
 }

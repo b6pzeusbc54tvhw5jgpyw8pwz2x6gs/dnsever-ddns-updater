@@ -1,43 +1,30 @@
 #!/usr/bin/env node
 
+'use strict';
+
 const when = require( 'when' );
 const fs = require('fs');
 const _ = require('underscore');
+
 const core = require('../core');
-const jsonFormat = require('json-format');
+
 const syncExec = require('sync-exec');
 const path = require('path');
 const Table = require('cli-table2');
-const readlinkSync = require('graceful-readlink').readlinkSync;
-const spawn = require('child_process').spawn;
-const CONFIG_FILE_NAME = 'config.json';
 const pkg = require('../package.json');
 const program = require('commander');
-require('ansi-escape-string');
+const colors = require('colors');
+colors.enabled = true;
 
-//
 //constants, enum
-//
-//const ERROR_EXIT = 1;
+const ERROR_EXIT = 1;
 //const SUCCESS_EXIT = 0;
 
-const ROOT_PATH = path.resolve(process.env.HOME, '.dnsever-ddns-updater');
-const LOG_PATH = path.resolve( ROOT_PATH, 'logs');
+const ROOT_PATH = core.getRootPath();
+const ENV_PATH = core.getEnvPath();
 const PROCESS_FILE_PATH = path.resolve( ROOT_PATH, 'process.json' );
-var IP_REGEXP = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
-//
-//init
-//
-(function() {
-  if (!fs.existsSync( ROOT_PATH )) {
-    fs.mkdirSync( ROOT_PATH );
-    fs.mkdirSync( LOG_PATH );
-  }
-
-  if (process.stdout._handle && process.stdout._handle.setBlocking)
-    process.stdout._handle.setBlocking(true);
-}());
+const IP_REGEXP = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
 
 program
@@ -51,6 +38,9 @@ program.on('--help', function() {
   console.log('    $ dnsever-ddns-updater id wonbin32');
   console.log('    $ dnsever-ddns-updater auth_code oiwj32olkd');
   console.log('');
+  console.log('    pm2 path can be set optionally ( if not set, find global pm2 )');
+  console.log('    $ dnsever-ddns-updater pm2_path /Users/b6pz/.nvm/versions/node/v4.2.6/bin/pm2');
+  console.log('');
   console.log('    Show all informatino');
   console.log('    $ dnsever-ddns-updater show');
   console.log('');
@@ -59,7 +49,7 @@ program.on('--help', function() {
   console.log('');
   console.log('    Updater try to set all your host ddns to public ip.');
   console.log('');
-  console.log('    If you have some exception host, add exception');
+  console.log('    If you have some exception hosts, add it to exception map');
   console.log('    $ dnsever-ddns-updater exception fakebook.com 123.123.123.123');
   console.log('');
   console.log('    If you want make some ip ignored,');
@@ -96,7 +86,7 @@ program.command('exception:delete <host>')
 
 	core.removeException( host );
 	console.log('');
-	console.log('Delete complete'.green());
+	console.log('Delete complete'.green);
 	printExceptionMap( core.getEnv('exceptionMap'));
 });
 
@@ -114,7 +104,7 @@ program.command('exception <host> <ip|ignore>')
 	ip = ip.toUpperCase();
 	if( ip !== 'IGNORE' && ! IP_REGEXP.test( ip )) {
 
-		console.log('Wrong ip address'.red());
+		console.log('Wrong ip address'.red);
 		return;
 	}
 
@@ -135,83 +125,69 @@ program.command('auth_code <auth_code>')
 	printCurrentConfig();
 });
 
-var globalPm2Path;
+program.command('pm2_path <pm2_path>')
+.description('set your pm2 absolute path')
+.action(function( pm2Path ) {
+	core.setEnv( 'pm2Path', pm2Path );
+	printCurrentConfig();
+});
+
+//
+// pm2 process.json
+//
+const PM2 = (function() {
+
+	let pm2Path = core.getEnv('pm2Path');
+	if( ! pm2Path ) {
+		var res = syncExec('which pm2');
+		pm2Path = ( res.stdout || '' ).replace( /\n$/,'' );
+	}
+
+	return pm2Path;
+}());
+
+if( !PM2 ) {
+	printPm2NotFoundInfo();
+	process.exit( ERROR_EXIT );
+}
+
 var pm2script = {
 	"name": "DNSEver.com DDNS Updater",
 	"script": path.join( __dirname, '../starter.js'),
 	"cwd": ROOT_PATH,
-	"watch": [ './'+CONFIG_FILE_NAME ],
+	"watch": [ ENV_PATH ],
 	"args": [ "--color" ]
 };
-
-var stdioOption = [ process.stdin, process.stdout, process.stderr ];
-// var stdioOption = [0,1,2];
 
 program.command('start')
 .description('Start the DNSEver DDNS Updater process')
 .action(function() {
 
-	if( !globalPm2Path ) {
-		printPm2NotFoundInfo();
-		return;
-	}
-
-	jsonFormat( pm2script );
-	fs.writeFileSync( PROCESS_FILE_PATH, jsonFormat( pm2script ));
-
-	spawn( globalPm2Path, ['start', PROCESS_FILE_PATH ], { stdio:stdioOption });
+	fs.writeFileSync( PROCESS_FILE_PATH, jsonStringify( pm2script ));
+	exec([ PM2, 'start', PROCESS_FILE_PATH ]);
 });
 
 program.command('stop')
 .description('Stop the DNSEver DDNS Updater process')
 .action(function() {
 
-	if( !globalPm2Path ) {
-		printPm2NotFoundInfo();
-		return;
-	}
-
-	jsonFormat( pm2script );
-	fs.writeFileSync( PROCESS_FILE_PATH, jsonFormat( pm2script ));
-
-	spawn( globalPm2Path, ['delete', pm2script.name ], { stdio: stdioOption });
+	fs.writeFileSync( PROCESS_FILE_PATH, jsonStringify( pm2script ));
+	exec([PM2,'delete', '"'+pm2script.name+'"' ]);
 });
 
 program.command('log')
 .description('display logs of the DNSEver DDNS Updater process')
 .action(function() {
 
-	if( !globalPm2Path ) {
-		printPm2NotFoundInfo();
-		return;
-	}
-
-	spawn( globalPm2Path, ['logs', pm2script.name, '--raw'], { stdio: stdioOption });
+	exec([ PM2, 'logs', '"'+pm2script.name+'"', '--raw']);
 });
 
-//
-// pm2 process.json
-//
-(function() {
-	var res = syncExec('which pm2');
-	var maybeSymlinkPath = ( res.stdout || '' ).replace( /\n$/,'' );
-	if( maybeSymlinkPath ) {
-		globalPm2Path = readlinkSync( maybeSymlinkPath );
-	}
-
-	if( globalPm2Path && ! /$\//.test( globalPm2Path ) ) {
-
-		globalPm2Path = path.join( path.dirname(maybeSymlinkPath), globalPm2Path);
-
-	} else if( globalPm2Path ) {
-
-	} else {
-
-	}
-
-}());
 
 program.parse(process.argv);
+
+function jsonStringify( json ) {
+	return JSON.stringify( json || {} , null, 2 );
+}
 
 function config() {
 
@@ -223,7 +199,7 @@ function config() {
 		var currentDDNSSettings = result[1];
 
 		console.log('');
-		console.log( ' Your config file path: ~/.dnsever-ddns-updater/config.json' );
+		console.log( ' Your config file path: ' + ENV_PATH );
 		printCurrentConfig( public_ip );
 		printCurrentDDNSSetting( currentDDNSSettings );
 		printExceptionMap( core.getEnv('exceptionMap'));
@@ -232,7 +208,7 @@ function config() {
 
 function printPm2NotFoundInfo() {
 	console.log('');
-	console.log('pm2 Not Found, install pm2 by typing a following command'.red());
+	console.log('pm2 Not Found, install pm2 by typing a following command'.red);
 	console.log('$ sudo npm install -g pm2'.white);
 }
 
@@ -240,14 +216,20 @@ function printCurrentConfig( public_ip ) {
 
 	var id = core.getEnv('id');
 	var auth_code = core.getEnv('auth_code');
-	if( ! id ) id = '[아이디를 설정하세요]'.red();
-	else id = id.green();
+	var pm2Path = core.getEnv('pm2Path');
 
-	if( ! auth_code ) auth_code = '[다이나믹DNS 인증코드를]'.red();
-	else auth_code = auth_code.green();
+	if( ! id ) id = '[아이디를 설정하세요]'.red;
+	else id = id.green;
+
+	if( ! auth_code ) auth_code = '[다이나믹DNS 인증코드를]'.red;
+	else auth_code = auth_code.green;
 
 	var table = new Table({
-		chars: { right: '', left: ' ', mid: '', 'left-mid': '', 'right-mid': '', 'mid-mid': '' },
+		chars: {
+			'top-left': '', top: '', 'top-right': '', 'top-mid': '',
+			right: '', left: ' ', mid: '', 'left-mid': '', 'right-mid': '', 'mid-mid': '',
+			'bottom-left': '', bottom: '', 'bottom-right': '', 'bottom-mid': ''
+		},
 		colWidths: [ 28, 34 ]
 	});
 	table.push(
@@ -256,30 +238,37 @@ function printCurrentConfig( public_ip ) {
 	);
 
 	if( public_ip ) {
-		if( IP_REGEXP.test( public_ip )) public_ip = public_ip.green();
-		else public_ip = 'NOT_FOUND_PUBLIC_UP'.red();
+		if( IP_REGEXP.test( public_ip )) public_ip = public_ip.green;
+		else public_ip = 'NOT_FOUND_PUBLIC_UP'.red;
 		table.push(
 			[{ hAlign: 'right', content:'current public_ip'}, public_ip ]
 		);
 	}
 
-	console.log('');
+	if( pm2Path ) {
+		table.push(
+			[{ hAlign: 'right', content:'pm2 path'}, pm2Path.green ]
+		);
+	}
+
+	console.log('────────────────────────────────────────────────────────────────'.gray);
 	console.log( ' Config settings');
+	console.log('');
 	console.log( table.toString() );
 }
 
 function printCurrentDDNSSetting( map ) {
 
 	console.log('');
+	console.log('────────────────────────────────────────────────────────────────'.gray);
 	console.log(' 현재 DDNS 설정상태');
-	console.log('────────────────────────────────────────────────────────────────'.gray());
 
 	if( _.isEmpty( map )) {
 		console.log( '{ }' );
 	} else if( map.errorCode ) {
-		console.log( jsonFormat(map, { type:'space',size:2 }).red() );
+		console.log( jsonStringify(map, { type:'space',size:2 }).red );
 	} else {
-		console.log( jsonFormat(map, { type:'space',size:2 }) );
+		console.log( JSON.stringify( map, null, 2 ) );
 	}
 
 	//var table = new Table({ chars: { right: '' }, colWidths: [ 69 ] });
@@ -290,26 +279,29 @@ function printCurrentDDNSSetting( map ) {
 function printExceptionMap( exceptionMap ) {
 
 	console.log('');
+	console.log('────────────────────────────────────────────────────────────────'.gray);
 	console.log(' 업데이트 예외 설정 - public_ip 로 셋팅되지 않는 host');
-	console.log('────────────────────────────────────────────────────────────────'.gray());
 	if( _.isEmpty( exceptionMap )) {
 		console.log( '{ }' );
 	} else {
-		console.log( jsonFormat(exceptionMap, { type:'space',size:2 }) );
+		console.log( jsonStringify(exceptionMap, { type:'space',size:2 }) );
 	}
-
-	//var table = new Table({ chars: { right: '' }, colWidths: [ 69 ] });
-	//table.push([ jsonFormat(exceptionMap) ]);
-	//console.log(beautify(obj, null, 2, 80);
-				
-	//console.log( table.toString() );
 }
 
 if (process.argv.length == 2) {
 
 	config().then( function() {
 		console.log( '' );
-		console.log('  -h, --help     output usage information'.yellow() );
+		console.log('  -h, --help     output usage information'.yellow );
 		console.log( '' );
 	});
+}
+
+function exec( cmd ) {
+
+	// var stdioOption = [0,1,2];
+	const execOptions = { stdio: [ process.stdin, process.stdout, process.stderr ] };
+	cmd = _.isArray( cmd ) ? cmd.join(' ') : cmd;
+
+	syncExec( cmd, execOptions );
 }
