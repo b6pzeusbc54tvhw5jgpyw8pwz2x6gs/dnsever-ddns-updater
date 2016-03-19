@@ -2,29 +2,29 @@
 
 'use strict';
 
-const when = require( 'when' );
-const fs = require('fs');
-const _ = require('underscore');
+var when = require( 'when' );
+var fs = require('fs');
+var _ = require('underscore');
 
-const core = require('../core');
+var core = require('../core');
 
-const syncExec = require('sync-exec');
-const path = require('path');
-const Table = require('cli-table2');
-const pkg = require('../package.json');
-const program = require('commander');
-const colors = require('colors');
+var syncExec = require('sync-exec');
+var path = require('path');
+var Table = require('cli-table2');
+var pkg = require('../package.json');
+var program = require('commander');
+var colors = require('colors');
 colors.enabled = true;
 
 //constants, enum
-const ERROR_EXIT = 1;
-//const SUCCESS_EXIT = 0;
+var ERROR_EXIT = 1;
+//var SUCCESS_EXIT = 0;
 
-const ROOT_PATH = core.getRootPath();
-const ENV_PATH = core.getEnvPath();
-const PROCESS_FILE_PATH = path.resolve( ROOT_PATH, 'process.json' );
+var ROOT_PATH = core.getRootPath();
+var ENV_PATH = core.getEnvPath();
+var PROCESS_FILE_PATH = path.resolve( ROOT_PATH, 'process.json' );
 
-const IP_REGEXP = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+var IP_REGEXP = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
 
 program
@@ -135,7 +135,7 @@ program.command('pm2_path <pm2_path>')
 //
 // pm2 process.json
 //
-const PM2 = (function() {
+var PM2 = (function() {
 
 	let pm2Path = core.getEnv('pm2Path');
 	if( ! pm2Path ) {
@@ -300,7 +300,7 @@ if (process.argv.length == 2) {
 function exec( cmd ) {
 
 	// var stdioOption = [0,1,2];
-	const execOptions = { stdio: [ process.stdin, process.stdout, process.stderr ] };
+	var execOptions = { stdio: [ process.stdin, process.stdout, process.stderr ] };
 	cmd = _.isArray( cmd ) ? cmd.join(' ') : cmd;
 
 	syncExec( cmd, execOptions );

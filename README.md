@@ -1,8 +1,10 @@
+[![npm version](https://img.shields.io/npm/v/dnsever-ddns-updater.svg?style=flat-square)](https://www.npmjs.com/package/dnsever-ddns-updater)
+
+[![Build Status](https://travis-ci.org/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater.svg?branch=master)](https://travis-ci.org/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater)
+
 # ddns-update-for-dnsever
 Nodejs DDNS Updater, for [DNSEver.com](https://DNSEver.com) ( DNS Service in Korea ).
 (DDNS: Dynamic Domain Name Service)
-
-[![npm version](https://img.shields.io/npm/v/dnsever-ddns-updater.svg?style=flat-square)](https://www.npmjs.com/package/dnsever-ddns-updater)
 
 ## pre install
 프로세스 매니저인 [pm2](https://www.npmjs.com/package/pm2) 환경에서 실행됩니다.

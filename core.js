@@ -23,11 +23,11 @@ var IP_REGEXP = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[0
 //
 //init
 //
-const ROOT_PATH = path.resolve(process.env.HOME, '.dnsever-ddns-updater');
-const LOG_PATH = path.resolve( ROOT_PATH, 'logs');
-//const PROCESS_FILE_PATH = path.resolve( ROOT_PATH, 'process.json' );
-const ENV_PATH = path.resolve( ROOT_PATH, 'config.json' );
-let env = (function () {
+var ROOT_PATH = path.resolve(process.env.HOME, '.dnsever-ddns-updater');
+var LOG_PATH = path.resolve( ROOT_PATH, 'logs');
+//var PROCESS_FILE_PATH = path.resolve( ROOT_PATH, 'process.json' );
+var ENV_PATH = path.resolve( ROOT_PATH, 'config.json' );
+var env = (function () {
 
 	if ( fs.existsSync( ENV_PATH )) {
 
