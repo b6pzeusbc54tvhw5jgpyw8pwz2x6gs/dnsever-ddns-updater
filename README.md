@@ -1,5 +1,4 @@
 [![npm version](https://img.shields.io/npm/v/dnsever-ddns-updater.svg?style=flat-square)](https://www.npmjs.com/package/dnsever-ddns-updater)
-
 [![Build Status](https://travis-ci.org/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater.svg?branch=master)](https://travis-ci.org/b6pzeusbc54tvhw5jgpyw8pwz2x6gs/dnsever-ddns-updater)
 
 # ddns-update-for-dnsever
