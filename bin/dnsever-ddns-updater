@@ -10,7 +10,7 @@ var core = require('../core');
 
 var syncExec = require('sync-exec');
 var path = require('path');
-var Table = require('cli-table2');
+var Table = require('cli-table3');
 var pkg = require('../package.json');
 var program = require('commander');
 var colors = require('colors');
